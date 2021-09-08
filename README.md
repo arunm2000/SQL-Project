@@ -1,2 +1,2 @@
-# SQL-Project
+# SQL-Projects
 Putting SQL knowledge into practice
