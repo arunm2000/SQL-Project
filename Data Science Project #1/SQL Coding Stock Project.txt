@@ -1,0 +1,99 @@
+/*Removing Nulls*/
+
+DELETE FROM stocks
+WHERE name IS NULL;
+
+/*Basic Queries*/
+
+SELECT DISTINCT name
+FROM stocks;
+
+SELECT *
+FROM stocks
+WHERE name = 'Apple Inc';
+
+SELECT *
+FROM stocks
+WHERE symbol = 'KO'
+AND price > 56;
+
+SELECT *
+FROM stocks
+WHERE symbol = 'NKE'
+AND price BETWEEN 165 AND 168;
+
+SELECT *
+FROM stocks
+ORDER BY price DESC;
+
+SELECT MIN(price),MAX(price)
+FROM stocks;
+
+/*Intermediate Queries*/
+
+SELECT MIN(price),MAX(price),AVG(price)
+FROM stocks;
+
+SELECT name,MIN(price),MAX(price),AVG(price)
+FROM stocks
+GROUP BY name;
+
+SELECT datetime,MIN(price),MAX(price),AVG(price)
+FROM stocks
+GROUP BY datetime;
+
+SELECT *
+FROM stocks
+WHERE price > (SELECT AVG(price) FROM stocks);
+
+/*Median and Variance*/
+
+SELECT price AS 'Median'
+FROM stocks
+ORDER BY price
+LIMIT 1
+OFFSET (SELECT COUNT(*)
+FROM stocks)/2;
+
+SELECT (AVG(price*price) - 
+	(AVG(price)*AVG(price)))/(COUNT(*)-1)
+	AS 'Variance'
+FROM stocks;
+
+/*Table Manipulation*/
+
+CREATE TABLE stock_info
+AS SELECT symbol,name
+FROM stocks;
+
+CREATE TABLE stock_price
+AS SELECT symbol,datetime,price
+FROM stocks;
+
+SELECT *
+FROM stock_price
+JOIN stock_info
+ON stock_info.symbol = stock_price.symbol;
+
+ALTER TABLE stock_info
+ADD industry TEXT;
+
+UPDATE stock_info
+SET industry = 'Footwear & Accessories'
+WHERE symbol = 'NKE';
+
+UPDATE stock_info
+SET industry = 'Beverages - Non-Alcoholic'
+WHERE symbol = 'KO';
+
+UPDATE stock_info
+SET industry = 'Consumer Electronics'
+WHERE symbol = 'AAPL';
+
+UPDATE stock_info
+SET industry = 'Household & Personal Products'
+WHERE symbol = 'PG';
+
+UPDATE stock_info
+SET industry = 'Banks - Diversified'
+WHERE symbol = 'JPM';

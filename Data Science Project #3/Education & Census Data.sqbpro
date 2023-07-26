@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="C:/Users/Mandeep Matharu/Google Drive/Coding/Data Science Projects/Data Science Project #3/Education &amp; Census Data.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="150"/><column_width id="3" width="5297"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><current_table name="4,14:mainpublic_hs_data"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="census_data" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="103"/><column index="2" value="123"/><column index="3" value="109"/><column index="4" value="290"/><column index="5" value="131"/><column index="6" value="300"/><column index="7" value="300"/><column index="8" value="235"/><column index="9" value="229"/><column index="10" value="250"/><column index="11" value="222"/><column index="12" value="224"/><column index="13" value="114"/><column index="14" value="111"/><column index="15" value="110"/><column index="16" value="141"/><column index="17" value="172"/><column index="18" value="187"/><column index="19" value="149"/><column index="20" value="155"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="public_hs_data" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="145"/><column index="2" value="300"/><column index="3" value="300"/><column index="4" value="196"/><column index="5" value="123"/><column index="6" value="103"/><column index="7" value="132"/><column index="8" value="220"/><column index="9" value="246"/><column index="10" value="114"/><column index="11" value="111"/><column index="12" value="110"/><column index="13" value="141"/><column index="14" value="172"/><column index="15" value="187"/><column index="16" value="149"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="Basic Analysis.sql">/*How many public high schools in each zip code?*/
+SELECT zip_code AS &quot;Zip Code&quot;,COUNT(school_name) AS &quot;Number of Schools&quot;
+FROM public_hs_data
+GROUP BY zip_code;
+
+/*How many public high schools in each state?*/
+SELECT state_code AS &quot;State&quot;, COUNT(school_name) AS &quot;Number of Schools&quot;
+FROM public_hs_data
+GROUP BY state_code;
+
+/*Create case statement to give more information about the location using the 
+locale_code*/
+SELECT school_name AS &quot;School Name&quot;, locale_code AS &quot;Location Code&quot;,
+CASE WHEN locale_code BETWEEN 11 AND 13 THEN &quot;City&quot;
+WHEN locale_code BETWEEN 21 AND 23 THEN &quot;Suburb&quot;
+WHEN locale_code BETWEEN 31 AND 33 THEN &quot;Town&quot;
+WHEN locale_code BETWEEN 41 AND 43 THEN &quot;Rural&quot;
+END AS &quot;Level of Urbanization&quot;,
+	
+CASE
+WHEN locale_code &lt;= 23 THEN
+CASE substr(locale_code,2,1)
+WHEN &quot;1&quot; THEN &quot;Large&quot;
+WHEN &quot;2&quot; THEN &quot;Midsize&quot;
+WHEN &quot;3&quot; THEN &quot;Small&quot;
+END
+
+WHEN locale_code &gt;= 31 THEN
+CASE substr(locale_code,2,1)
+WHEN &quot;1&quot; THEN &quot;Fringe&quot;
+WHEN &quot;2&quot; THEN &quot;Distant&quot;
+WHEN &quot;3&quot; THEN &quot;Remote&quot;
+END
+END AS &quot;Size&quot;
+
+FROM public_hs_data;
+
+/*What is the minimum, maximum and average median_household_income of the nation?*/
+SELECT MIN(median_household_income) AS &quot;Minimum median_household_income&quot;,
+MAX(median_household_income) AS &quot;Maximum median_household_income&quot;, 
+AVG(median_household_income) AS &quot;Average median_household_income&quot;
+
+FROM census_data
+WHERE median_household_income != &quot;NULL&quot;;
+
+/*What is the minimum, maximum and average median_household_income of each state?*/
+SELECT state_code AS &quot;State&quot;,
+MIN(median_household_income) AS &quot;Minimum median_household_income&quot;,
+MAX(median_household_income) AS &quot;Maximum median_household_income&quot;, 
+AVG(median_household_income) AS &quot;Average median_household_income&quot;
+
+FROM census_data
+WHERE median_household_income != &quot;NULL&quot;
+GROUP BY state_code;
+
+/*Joint Analysis*/
+
+/*Do characteristics of the zip_code area, such as median_household_income, 
+influence students' performance in high school?*/
+SELECT
+
+CASE WHEN median_household_income &lt; 50000 THEN &quot;Low Income&quot;
+WHEN median_household_income BETWEEN 50000 AND 100000 THEN &quot;Medium Income&quot;
+WHEN median_household_income &gt; 100000 THEN &quot;High Income&quot;
+END AS IncomeGroup,
+	
+ROUND(AVG(pct_proficient_math)) AS &quot;Math Proficiency (%)&quot;,
+ROUND(AVG(pct_proficient_reading)) AS &quot;Reading Proficiency (%)&quot;
+
+FROM public_hs_data
+JOIN census_data
+ON public_hs_data.zip_code = census_data.zip_code
+WHERE median_household_income != &quot;NULL&quot;
+GROUP BY 1
+ORDER BY 2 DESC;
+
+	</sql><current_tab id="0"/></tab_sql></sqlb_project>
